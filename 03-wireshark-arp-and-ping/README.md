@@ -24,7 +24,7 @@ My PC 192.168.1.2  --ICMP ping-->  Gateway 192.168.1.1
 
 ## Screenshots
 ![Wireshark capture of ARP and ICMP](wireshark-arp-icmp.png)
-![ipconfig output](ipconfig.png)
+![ipconfig output](ping.png)
 
 ## What I found
 
