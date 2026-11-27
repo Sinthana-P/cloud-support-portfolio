@@ -1,54 +1,45 @@
-# Find My IP, Gateway and DNS (Private vs Public)
+# Finding My IP, Gateway and DNS (and Telling Private from Public)
 
-## Goal
-Find the three key network settings on my PC (IP address, default gateway, DNS server), decide which addresses are private or public, and see how my private address relates to my public one.
+After the first labs I knew my IP address and my gateway, but I hadn't looked at DNS yet. In this lab I found all three on my PC, worked out which addresses are private and which are public, and then looked up my public address to see how different it is from the one my PC uses.
 
-## Environment
-- Host OS: Windows 11, connected over Wi-Fi
-- Linux: Ubuntu on WSL2
-- Tools: `ipconfig /all`, a browser IP lookup site
+## What I used
+- Windows 11 on Wi-Fi
+- Ubuntu on WSL2
+- `ipconfig /all` and a browser IP lookup site
 
-## Architecture
-```
-Your PC 10.155.166.62  -->  Gateway 10.155.166.183  -->  Public IP (171.x.x.x)  -->  Internet
-(private address)           (the exit door)               (address websites see)
-```
+## Finding the DNS server
+I ran `ipconfig /all` in Command Prompt and looked under the Wi-Fi adapter for the **DNS Servers** line. It showed `10.155.166.183`, plus an IPv6 address.
 
-## Steps
-1. Ran `ipconfig /all` in Command Prompt.
-2. Found the DNS Servers line under the Wireless LAN adapter Wi-Fi section.
-3. Labelled each address as private or public using the private ranges.
-4. Searched "what is my IP address" in a browser to find my public IP, then compared it with my private IP.
+The first thing I noticed was that the DNS server is the **same address as my gateway**. At first that looked odd, but it's common. My router (or phone hotspot) also answers name lookups for me. DNS is basically the phone book of the internet: it turns a name like google.com into an IP address.
 
-## Screenshots
-![ipconfig /all output](ipconfig-all.png)
+## Sorting my addresses into private and public
+Next I labelled the four addresses I had so far:
 
-## What I found
+| Address | What it is | Private or public? |
+|---|---|---|
+| 10.155.166.62 | My PC | Private |
+| 10.155.166.183 | My gateway | Private |
+| 10.155.166.183 | My DNS server (IPv4) | Private |
+| 172.31.154.137 | My Linux (WSL) machine | Private |
 
-| Item | Value | Private or public? | Why |
-|---|---|---|---|
-| PC IP | 10.155.166.62 | Private | Inside 10.0.0.0 - 10.255.255.255 |
-| Default gateway | 10.155.166.183 | Private | Inside the 10.x range |
-| DNS server (IPv4) | 10.155.166.183 | Private | Inside the 10.x range |
-| Linux (WSL) IP | 172.31.154.137 | Private | Inside 172.16.0.0 - 172.31.255.255 |
-| Public IP (from browser) | starts with 171 | Public | Outside all private ranges |
+All four are private. The ranges are:
 
-The DNS server is the same address as the gateway. My router/hotspot also answers name lookups for me.
-
-## Private IP ranges
 | Range | From | To |
 |---|---|---|
 | 10.x.x.x | 10.0.0.0 | 10.255.255.255 |
-| 172.16-31.x.x | 172.16.0.0 | 172.31.255.255 |
+| 172.16 to 172.31.x.x | 172.16.0.0 | 172.31.255.255 |
 | 192.168.x.x | 192.168.0.0 | 192.168.255.255 |
 
-## What I learned
-- DNS is the phone book of the internet: it turns names like google.com into IP addresses.
-- The gateway can also act as the DNS server, which is common on home routers and phone hotspots.
-- Only part of the 172 range is private (172.16 to 172.31), not all of it.
-- My PC has a private address, but websites see a different public address.
-- The gateway swaps my private address for the public one on the way out. This is called NAT.
-- With mobile data and hotspots, many customers can share one public IP.
+I almost got caught by the 172 range. Only part of it is private, from 172.16 to 172.31, and my Linux address (172.31.x.x) sits right at the very end of it. I also forgot to mention the 192.168 range at first, which is the most common one at home.
 
-## Cleanup
-- No cloud resources were created, so there is nothing to delete and no billing risk.
+## Looking at my public address
+Then I searched "what is my IP address" in my browser. The address it showed started with **171**, which is outside all three private ranges, so it's a public IP. It was also completely different from my PC's address of 10.155.166.62.
+
+So the picture looks like this:
+
+```
+My PC 10.155.166.62  -->  Gateway  -->  Public IP (171.x.x.x)  -->  Internet
+(private address)         (the door)     (the address websites see)
+```
+
+My gateway swaps my private address for the public one on the way out. That trick is called NAT.
